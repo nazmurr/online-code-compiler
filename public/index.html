@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Code Compiler</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs/loader.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        #container {
+            height: 500px;
+            /*width: 80%;*/
+            margin: 20px auto;
+            border: 1px solid #ccc;
+        }
+
+        #output {
+            background: #f4f4f4;
+            border: 1px solid #ddd;
+            padding: 10px;
+            /* width: 80%; */
+            margin: 20px auto;
+        }
+
+        select,
+        button {
+            margin: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="width: 80%; margin: 0 auto;">
+        <h1>Online Code Compiler</h1>
+        <div id="container"></div>
+        <select id="language" onchange="updateLanguage()">
+            <option value="javascript">JavaScript</option>
+            <option value="python">Python</option>
+            <option value="php">PHP</option>
+            <option value="java">Java</option>
+        </select>
+        <button onclick="compileCode()">Compile Code</button>
+        <h5>Output</h5>
+        <pre id="output"></pre>
+
+    </div>
+
+
+    <script>
+        var editor;
+        require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+            editor = monaco.editor.create(document.getElementById('container'), {
+                value: '',
+                language: 'javascript',
+                minimap: { enabled: false }
+            });
+        });
+
+        function updateLanguage() {
+            const language = document.getElementById('language').value;
+            monaco.editor.setModelLanguage(editor.getModel(), language);
+            editor.setValue('');
+        }
+
+        function compileCode() {
+            const language = document.getElementById('language').value;
+            const code = editor.getValue();
+            fetch('http://localhost:3000/compile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ language, code })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('output').textContent = data.output;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('output').textContent = 'Error: ' + error.message;
+                });
+        }
+    </script>
+</body>
+
+</html>
