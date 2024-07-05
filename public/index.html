@@ -70,7 +70,8 @@
         function compileCode() {
             const language = document.getElementById('language').value;
             const code = editor.getValue();
-            fetch('http://localhost:3000/compile', {
+            const url = `${window.location.origin}/compile`;
+            fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
